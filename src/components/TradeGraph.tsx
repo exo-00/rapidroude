@@ -188,9 +188,18 @@ export function TradeGraph({ selectedId, onSelect }: Props) {
   return (
     <div
       ref={containerRef}
-      className="h-full w-full bg-background"
+      className="relative h-full w-full overflow-hidden bg-background"
       role="application"
       aria-label="Global trade network graph"
-    />
+    >
+      <div
+        ref={mapRef}
+        className="pointer-events-none absolute left-0 top-0"
+        style={{ transformOrigin: "0 0", willChange: "transform" }}
+        aria-hidden
+      >
+        <WorldMapLayer />
+      </div>
+    </div>
   );
 }
