@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import cytoscape, { Core, ElementDefinition, EventObject } from "cytoscape";
 import { EDGES, NODES, riskBand, riskScore, TradeNode } from "@/data/tradeGraph";
+import { WorldMapLayer } from "@/components/WorldMapLayer";
 
 interface Props {
   selectedId: string | null;
@@ -27,6 +28,7 @@ function cssVar(name: string): string {
 
 export function TradeGraph({ selectedId, onSelect }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<Core | null>(null);
 
   const elements: ElementDefinition[] = useMemo(() => {
@@ -140,6 +142,17 @@ export function TradeGraph({ selectedId, onSelect }: Props) {
     cyRef.current = cy;
     cy.fit(undefined, 40);
 
+    // Keep the world map layer aligned with cytoscape's pan/zoom.
+    const syncMap = () => {
+      const el = mapRef.current;
+      if (!el) return;
+      const pan = cy.pan();
+      const zoom = cy.zoom();
+      el.style.transform = `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${zoom})`;
+    };
+    syncMap();
+    cy.on("pan zoom resize", syncMap);
+
     cy.on("tap", "node", (evt: EventObject) => {
       onSelect(evt.target.id() as string);
     });
@@ -148,6 +161,7 @@ export function TradeGraph({ selectedId, onSelect }: Props) {
     });
 
     return () => {
+      cy.removeListener("pan zoom resize", syncMap);
       cy.destroy();
       cyRef.current = null;
     };
@@ -174,9 +188,18 @@ export function TradeGraph({ selectedId, onSelect }: Props) {
   return (
     <div
       ref={containerRef}
-      className="h-full w-full bg-background"
+      className="relative h-full w-full overflow-hidden bg-background"
       role="application"
       aria-label="Global trade network graph"
-    />
+    >
+      <div
+        ref={mapRef}
+        className="pointer-events-none absolute left-0 top-0"
+        style={{ transformOrigin: "0 0", willChange: "transform" }}
+        aria-hidden
+      >
+        <WorldMapLayer />
+      </div>
+    </div>
   );
 }
