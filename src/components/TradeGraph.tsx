@@ -28,6 +28,7 @@ function cssVar(name: string): string {
 
 export function TradeGraph({ selectedId, onSelect }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<Core | null>(null);
 
   const elements: ElementDefinition[] = useMemo(() => {
