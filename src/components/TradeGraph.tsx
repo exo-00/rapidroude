@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import cytoscape, { Core, ElementDefinition, EventObject } from "cytoscape";
 import { EDGES, NODES, riskBand, riskScore, TradeNode } from "@/data/tradeGraph";
+import { WorldMapLayer } from "@/components/WorldMapLayer";
 
 interface Props {
   selectedId: string | null;
