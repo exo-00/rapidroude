@@ -142,6 +142,17 @@ export function TradeGraph({ selectedId, onSelect }: Props) {
     cyRef.current = cy;
     cy.fit(undefined, 40);
 
+    // Keep the world map layer aligned with cytoscape's pan/zoom.
+    const syncMap = () => {
+      const el = mapRef.current;
+      if (!el) return;
+      const pan = cy.pan();
+      const zoom = cy.zoom();
+      el.style.transform = `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${zoom})`;
+    };
+    syncMap();
+    cy.on("pan zoom resize", syncMap);
+
     cy.on("tap", "node", (evt: EventObject) => {
       onSelect(evt.target.id() as string);
     });
@@ -150,6 +161,7 @@ export function TradeGraph({ selectedId, onSelect }: Props) {
     });
 
     return () => {
+      cy.removeListener("pan zoom resize", syncMap);
       cy.destroy();
       cyRef.current = null;
     };
